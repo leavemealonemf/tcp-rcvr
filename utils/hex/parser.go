@@ -11,7 +11,7 @@ import (
 func clearInput(input string) string {
 	cleanInput := strings.Map(func(r rune) rune {
 		if unicode.IsSpace(r) {
-			return -1 // Убираем символ
+			return -1
 		}
 		return r
 	}, input)
