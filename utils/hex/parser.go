@@ -7,6 +7,10 @@ import (
 )
 
 func DecodeHexData(input string) ([]int, error) {
+	if len(input)%4 != 0 {
+		return nil, fmt.Errorf("некорректная длина строки, должно быть кратно 4")
+	}
+
 	var result []int
 
 	var iteration uint8 = 0
