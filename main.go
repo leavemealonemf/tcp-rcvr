@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"net"
 	"stcp/utils/hex"
@@ -36,6 +37,7 @@ func handleConn(c net.Conn) {
 		logger.Println("Recieved msg:", msg)
 
 		// DECODE MESSAGES
+		fmt.Println("Msg len:", len(msg))
 		if len(msg) == HEXABLE_IMEI_LEN {
 			dec, err := hex.DecodeHexStr(msg)
 			if err != nil {
