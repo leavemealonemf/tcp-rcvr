@@ -4,9 +4,24 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strconv"
+	"strings"
+	"unicode"
 )
 
-func DecodeHexData(input string) ([]int, error) {
+func clearInput(input string) string {
+	cleanInput := strings.Map(func(r rune) rune {
+		if unicode.IsSpace(r) {
+			return -1 // Убираем символ
+		}
+		return r
+	}, input)
+
+	return cleanInput
+}
+
+func DecodeHexData(h string) ([]int, error) {
+	input := clearInput(h)
+
 	if len(input)%4 != 0 {
 		return nil, fmt.Errorf("некорректная длина строки, должно быть кратно 4")
 	}
@@ -36,7 +51,8 @@ func DecodeHexData(input string) ([]int, error) {
 }
 
 func DecodeHexStr(hs string) (string, error) {
-	dec, err := hex.DecodeString(hs)
+	input := clearInput(hs)
+	dec, err := hex.DecodeString(input)
 	if err != nil {
 		return "", fmt.Errorf("ошибка преобразования данных: %s", err.Error())
 	}
