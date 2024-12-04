@@ -4,10 +4,16 @@ import (
 	"bufio"
 	"log"
 	"net"
+	"stcp/utils/hex"
+	"time"
 )
 
 const (
-	network = ":8080"
+	HEXABLE_IMEI_LEN = 61
+)
+
+const (
+	network = ":8000"
 )
 
 var logger *log.Logger
@@ -26,7 +32,26 @@ func handleConn(c net.Conn) {
 			logger.Printf("Disconnect\nLocal Addr: %v;\nRemote Addr: %v", c.LocalAddr(), c.RemoteAddr())
 			break
 		}
+
 		logger.Println("Recieved msg:", msg)
+
+		// DECODE MESSAGES
+		if len(msg) == HEXABLE_IMEI_LEN {
+			dec, err := hex.DecodeHexStr(msg)
+			if err != nil {
+				logger.Println(err.Error())
+			}
+			logger.Println(dec)
+		} else {
+			dec, err := hex.DecodeHexData(msg)
+			if err != nil {
+				logger.Println(err.Error())
+			}
+			logger.Println(dec)
+		}
+
+		c.Write([]byte("Hello SIM800L from golang serve! =)"))
+		time.Sleep(time.Second * 5)
 	}
 }
 
