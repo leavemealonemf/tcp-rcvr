@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	HEXABLE_IMEI_LEN = 61
+	HEXABLE_IMEI_LEN = 62
 )
 
 const (
