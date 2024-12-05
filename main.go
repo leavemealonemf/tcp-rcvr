@@ -63,7 +63,7 @@ func handleConn(c net.Conn) {
 		if !isImeiSaved {
 			if len(msg) == HEXABLE_IMEI_LEN {
 				dec, err := hex.DecodeHexStr(msg)
-
+				fmt.Println("DECODED IMEI LEN", len(dec))
 				if err != nil {
 					logger.Println(err.Error())
 					break
