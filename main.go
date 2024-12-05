@@ -92,32 +92,6 @@ func handleConn(c net.Conn) {
 				logger.Println(err.Error())
 			}
 			logger.Printf("Decoded HEX Data From device with IMEI: %v\nDATA:%v\n", imei, dec)
-		}
-
-		if len(msg) == HEXABLE_IMEI_LEN {
-			dec, err := hex.DecodeHexStr(msg)
-
-			if len(dec) == IMEI_LEN {
-				logger.Println("IMEI detected. Adding in map...")
-				imei = dec
-				devices[dec] = Device{
-					IMEI:   dec,
-					Socket: c,
-				}
-				c.Write([]byte("01"))
-			}
-
-			if err != nil {
-				logger.Println(err.Error())
-			}
-			logger.Println("Decoded IMEI:", dec)
-		} else {
-			dec, err := hex.DecodeHexData(msg)
-			if err != nil {
-				logger.Println(err.Error())
-			}
-			logger.Printf("Decoded HEX Data From device with IMEI: %v\nDATA:%v\n", imei, dec)
-
 			c.Write([]byte("Hello SIM800L from golang serve! =)"))
 			time.Sleep(time.Second * 5)
 		}
