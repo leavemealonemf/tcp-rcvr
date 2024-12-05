@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"net"
 	"stcp/utils/hex"
@@ -11,49 +10,116 @@ import (
 
 const (
 	HEXABLE_IMEI_LEN = 62
+	AVERAGE_IMEI_LEN = 10
+	IMEI_LEN         = 15
 )
 
 const (
 	network = ":8000"
 )
 
+// 003800360030003300380039003000350035003900320036003700330033
+
+type Device struct {
+	IMEI       string
+	Socket     net.Conn
+	Handshaked bool
+}
+
 var logger *log.Logger
-var socks []net.Conn
+var devices map[string]Device
+
+func disconnectLog(locAddr, remAddr net.Addr) {
+	logger.Printf("Disconnect\nLocal Addr: %v;\nRemote Addr: %v", locAddr, remAddr)
+}
 
 func handleConn(c net.Conn) {
 	logger.Printf("Recieved new connection\nLocal Addr: %v\nRemote Addr: %v", c.LocalAddr(), c.RemoteAddr())
 
+	var imei string
+	var isImeiSaved bool = false
+
 	defer c.Close()
+	defer disconnectLog(c.LocalAddr(), c.RemoteAddr())
+
 	reader := bufio.NewReader(c)
 
 	for {
 		msg, err := reader.ReadString('\n')
+
 		if err != nil {
 			logger.Println("Recieved msg err:\n", err.Error())
-			logger.Printf("Disconnect\nLocal Addr: %v;\nRemote Addr: %v", c.LocalAddr(), c.RemoteAddr())
+			if len(imei) > 10 {
+				logger.Printf("Delete Device with imei: %v from map\n", imei)
+				delete(devices, imei)
+				isImeiSaved = false
+			}
 			break
 		}
 
 		logger.Println("Recieved msg:", msg)
 
-		// DECODE MESSAGES
-		fmt.Println("Msg len:", len(msg))
-		if len(msg) == HEXABLE_IMEI_LEN {
-			dec, err := hex.DecodeHexStr(msg)
-			if err != nil {
-				logger.Println(err.Error())
+		if !isImeiSaved {
+			if len(msg) == HEXABLE_IMEI_LEN {
+				dec, err := hex.DecodeHexStr(msg)
+
+				if err != nil {
+					logger.Println(err.Error())
+					break
+				}
+
+				if len(dec) == IMEI_LEN {
+					logger.Println("IMEI detected. Adding in map...")
+					imei = dec
+					devices[dec] = Device{
+						IMEI:       dec,
+						Socket:     c,
+						Handshaked: true,
+					}
+					c.Write([]byte("01"))
+				}
+
+				logger.Println("Decoded IMEI:", dec)
+				logger.Panicln("IMEI Successfully saved")
+				isImeiSaved = true
+			} else {
+				break
 			}
-			logger.Println(dec)
 		} else {
 			dec, err := hex.DecodeHexData(msg)
 			if err != nil {
 				logger.Println(err.Error())
 			}
-			logger.Println(dec)
+			logger.Printf("Decoded HEX Data From device with IMEI: %v\nDATA:%v\n", imei, dec)
 		}
 
-		c.Write([]byte("Hello SIM800L from golang serve! =)"))
-		time.Sleep(time.Second * 5)
+		if len(msg) == HEXABLE_IMEI_LEN {
+			dec, err := hex.DecodeHexStr(msg)
+
+			if len(dec) == IMEI_LEN {
+				logger.Println("IMEI detected. Adding in map...")
+				imei = dec
+				devices[dec] = Device{
+					IMEI:   dec,
+					Socket: c,
+				}
+				c.Write([]byte("01"))
+			}
+
+			if err != nil {
+				logger.Println(err.Error())
+			}
+			logger.Println("Decoded IMEI:", dec)
+		} else {
+			dec, err := hex.DecodeHexData(msg)
+			if err != nil {
+				logger.Println(err.Error())
+			}
+			logger.Printf("Decoded HEX Data From device with IMEI: %v\nDATA:%v\n", imei, dec)
+
+			c.Write([]byte("Hello SIM800L from golang serve! =)"))
+			time.Sleep(time.Second * 5)
+		}
 	}
 }
 
@@ -65,12 +131,13 @@ func main() {
 		log.Fatalf("listen sock err: %v\n", err.Error())
 	}
 
+	devices = make(map[string]Device)
+
 	for {
 		conn, err := s.Accept()
 		if err != nil {
 			logger.Println("Received conn err:", err.Error())
 		}
-		socks = append(socks, conn)
 		go handleConn(conn)
 	}
 }
