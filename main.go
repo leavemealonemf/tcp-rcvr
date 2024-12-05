@@ -12,7 +12,8 @@ import (
 const (
 	HEXABLE_IMEI_LEN = 62
 	AVERAGE_IMEI_LEN = 10
-	IMEI_LEN         = 15
+	IMEI_LEN_ASCII   = 15
+	IMEI_LEN_UNICODE = 30
 )
 
 const (
@@ -63,13 +64,16 @@ func handleConn(c net.Conn) {
 		if !isImeiSaved {
 			if len(msg) == HEXABLE_IMEI_LEN {
 				dec, err := hex.DecodeHexStr(msg)
+
+				imeiLen := len(dec)
+
 				fmt.Println("DECODED IMEI LEN", len(dec))
 				if err != nil {
 					logger.Println(err.Error())
 					break
 				}
 
-				if len(dec) == IMEI_LEN {
+				if imeiLen == IMEI_LEN_ASCII || imeiLen == IMEI_LEN_UNICODE {
 					logger.Println("IMEI detected. Adding in map...")
 					imei = dec
 					devices[dec] = Device{
