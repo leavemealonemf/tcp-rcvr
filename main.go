@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"net"
 	"stcp/utils/hex"
@@ -80,7 +81,7 @@ func handleConn(c net.Conn) {
 				}
 
 				logger.Println("Decoded IMEI:", dec)
-				logger.Panicln("IMEI Successfully saved")
+				logger.Println("IMEI Successfully saved")
 				isImeiSaved = true
 			} else {
 				break
@@ -123,6 +124,18 @@ func handleConn(c net.Conn) {
 	}
 }
 
+func printDevices() {
+	for {
+		time.Sleep(time.Second * 10)
+		fmt.Println("Saved devices:")
+		fmt.Println("--------------")
+		for k := range devices {
+			fmt.Println(devices[k].IMEI)
+		}
+		fmt.Println("--------------")
+	}
+}
+
 func main() {
 	logger = log.Default()
 	s, err := net.Listen("tcp", network)
@@ -139,5 +152,6 @@ func main() {
 			logger.Println("Received conn err:", err.Error())
 		}
 		go handleConn(conn)
+		printDevices()
 	}
 }
