@@ -78,11 +78,15 @@ func handleConn(c net.Conn) {
 						Handshaked: true,
 					}
 					c.Write([]byte("01"))
-				}
 
-				logger.Println("Decoded IMEI:", dec)
-				logger.Println("IMEI Successfully saved")
-				isImeiSaved = true
+					logger.Println("Decoded IMEI:", dec)
+					logger.Println("IMEI Successfully saved")
+					logger.Println("Saved DEC VAR IMEI:", dec)
+					logger.Println("Saved IMEI:", imei)
+					isImeiSaved = true
+				} else {
+					break
+				}
 			} else {
 				break
 			}
