@@ -39,7 +39,7 @@ func DecodeHexData(h string) ([]int, error) {
 
 		dataPart := input[i : i+4]
 
-		num, err := strconv.ParseInt(dataPart, 16, 8)
+		num, err := strconv.ParseInt(dataPart, 16, 16)
 		if err != nil {
 			return nil, fmt.Errorf("ошибка преобразования данных: %s", dataPart)
 		}
