@@ -134,6 +134,6 @@ func main() {
 			logger.Println("Received conn err:", err.Error())
 		}
 		go handleConn(conn)
-		printDevices()
+		// printDevices()
 	}
 }
