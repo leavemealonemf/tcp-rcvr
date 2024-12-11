@@ -95,28 +95,29 @@ func handleConn(c net.Conn) {
 				break
 			}
 		} else {
-			dec, err := hex.DecodeHexData(msg)
-			if err != nil {
-				logger.Println(err.Error())
-			}
-			logger.Printf("Decoded HEX Data From device with IMEI: %v\nDATA:%v\n", imei, dec)
+			// dec, err := hex.DecodeHexData(msg)
+			// if err != nil {
+			// 	logger.Println(err.Error())
+			// }
+			// logger.Printf("Decoded HEX Data From device with IMEI: %v\nDATA:%v\n", imei, dec)
+			logger.Printf("Encoded HEX Data From device with IMEI: %v\nDATA:%v\n", imei, msg)
 			c.Write([]byte("Hello SIM800L from golang serve! =)"))
 			time.Sleep(time.Second * 5)
 		}
 	}
 }
 
-func printDevices() {
-	for {
-		time.Sleep(time.Second * 10)
-		fmt.Println("Saved devices:")
-		fmt.Println("--------------")
-		for k := range devices {
-			fmt.Println(devices[k].IMEI)
-		}
-		fmt.Println("--------------")
-	}
-}
+// func printDevices() {
+// 	for {
+// 		time.Sleep(time.Second * 10)
+// 		fmt.Println("Saved devices:")
+// 		fmt.Println("--------------")
+// 		for k := range devices {
+// 			fmt.Println(devices[k].IMEI)
+// 		}
+// 		fmt.Println("--------------")
+// 	}
+// }
 
 func main() {
 	logger = log.Default()
