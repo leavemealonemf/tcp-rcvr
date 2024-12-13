@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net"
+	liteDecoder "stcp/decoder/lite"
 	"stcp/utils/hex"
+	"strings"
 	"time"
 )
 
@@ -19,8 +21,6 @@ const (
 const (
 	network = ":8000"
 )
-
-// 003800360030003300380039003000350035003900320036003700330033
 
 type Device struct {
 	IMEI       string
@@ -95,37 +95,33 @@ func handleConn(c net.Conn) {
 				break
 			}
 		} else {
-			// dec, err := hex.DecodeHexData(msg)
-			// if err != nil {
-			// 	logger.Println(err.Error())
-			// }
-			// logger.Printf("Decoded HEX Data From device with IMEI: %v\nDATA:%v\n", imei, dec)
 			logger.Printf("Encoded HEX Data From device with IMEI: %v\nDATA:%v\n", imei, msg)
+			clearPacket := hex.ClearInput(msg)
+			packet, err := liteDecoder.DecodePacket(clearPacket)
+
+			if err != nil {
+				logger.Println(err.Error())
+				continue
+			}
+
+			logger.Printf("Decoded JSON Data:\n\n%s\r\n", string(packet))
+
 			c.Write([]byte("Hello SIM800L from golang serve! =)"))
 			time.Sleep(time.Second * 5)
 		}
 	}
 }
 
-// func printDevices() {
-// 	for {
-// 		time.Sleep(time.Second * 10)
-// 		fmt.Println("Saved devices:")
-// 		fmt.Println("--------------")
-// 		for k := range devices {
-// 			fmt.Println(devices[k].IMEI)
-// 		}
-// 		fmt.Println("--------------")
-// 	}
-// }
-
 func main() {
 	logger = log.Default()
+	logger.SetPrefix("[SERVER] ")
 	s, err := net.Listen("tcp", network)
 
 	if err != nil {
 		log.Fatalf("listen sock err: %v\n", err.Error())
 	}
+
+	logger.Printf("Waiting for accept connections...\nNetwork: %s\nAddr: %s\r\n", strings.ToUpper(s.Addr().Network()), s.Addr().String())
 
 	devices = make(map[string]Device)
 
@@ -135,6 +131,5 @@ func main() {
 			logger.Println("Received conn err:", err.Error())
 		}
 		go handleConn(conn)
-		// printDevices()
 	}
 }

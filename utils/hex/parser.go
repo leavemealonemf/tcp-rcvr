@@ -8,7 +8,7 @@ import (
 	"unicode"
 )
 
-func clearInput(input string) string {
+func ClearInput(input string) string {
 	cleanInput := strings.Map(func(r rune) rune {
 		if unicode.IsSpace(r) {
 			return -1
@@ -20,7 +20,7 @@ func clearInput(input string) string {
 }
 
 func DecodeHexData(h string) ([]int, error) {
-	input := clearInput(h)
+	input := ClearInput(h)
 
 	if len(input)%4 != 0 {
 		return nil, fmt.Errorf("некорректная длина строки, должно быть кратно 4")
@@ -51,7 +51,7 @@ func DecodeHexData(h string) ([]int, error) {
 }
 
 func DecodeHexStr(hs string) (string, error) {
-	input := clearInput(hs)
+	input := ClearInput(hs)
 	dec, err := hex.DecodeString(input)
 	if err != nil {
 		return "", fmt.Errorf("ошибка преобразования данных: %s", err.Error())
