@@ -67,6 +67,10 @@ func DecodePacket(packet string) ([]byte, error) {
 
 	atlLat, _ := hexToDec(packet[38:46])
 	atlLon, _ := hexToDec(packet[46:54])
+
+	fmt.Printf("hex lat: %v\nhex lon: %v\n", packet[38:46], packet[46:54])
+	fmt.Printf("dec lat: %v\ndec lon: %v\n", atlLat, atlLon)
+
 	atlAltitude, _ := hexToDec(packet[54:58])
 	atlAngle, _ := hexToDec(packet[58:62])
 	atlSatellites, _ := hexToDec(packet[62:64])
