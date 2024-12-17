@@ -3,6 +3,7 @@ package hex
 import (
 	"encoding/hex"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"unicode"
@@ -57,4 +58,22 @@ func DecodeHexStr(hs string) (string, error) {
 		return "", fmt.Errorf("ошибка преобразования данных: %s", err.Error())
 	}
 	return string(dec), nil
+}
+
+func HexToFloat(hexValue string) (float32, error) {
+	bytes, err := hex.DecodeString(hexValue)
+	if err != nil {
+		return 0, fmt.Errorf("ошибка декодирования HEX: %v", err)
+	}
+
+	if len(bytes) != 4 {
+		return 0, fmt.Errorf("некорректная длина данных, ожидалось 4 байта, получено: %d", len(bytes))
+	}
+
+	// Преобразуем байты в uint32
+	bits := uint32(bytes[0])<<24 | uint32(bytes[1])<<16 | uint32(bytes[2])<<8 | uint32(bytes[3])
+
+	// Преобразуем uint32 в float32 (IEEE 754)
+	floatValue := math.Float32frombits(bits)
+	return floatValue, nil
 }

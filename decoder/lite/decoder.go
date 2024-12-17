@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"stcp/utils/hex"
 	"strconv"
 	"time"
 )
@@ -14,15 +15,15 @@ type avlDataValue struct {
 }
 
 type finalPacket struct {
-	Timestamp  uint64 `json:"_ts"`
-	Online     bool   `json:"online"`
-	Lat        uint32 `json:"lat"`
-	Lon        uint32 `json:"lon"`
-	Speed      uint32 `json:"speed"`
-	Altitude   uint32 `json:"altitude"`
-	Angle      uint32 `json:"angle"`
-	Satellites uint32 `json:"sat-count"`
-	GSMSignal  uint32 `json:"signal"`
+	Timestamp  uint64  `json:"_ts"`
+	Online     bool    `json:"online"`
+	Lat        float32 `json:"lat"`
+	Lon        float32 `json:"lon"`
+	Speed      uint32  `json:"speed"`
+	Altitude   uint32  `json:"altitude"`
+	Angle      uint32  `json:"angle"`
+	Satellites uint32  `json:"sat-count"`
+	GSMSignal  uint32  `json:"signal"`
 }
 
 var packetMap map[string]*avlDataValue
@@ -65,8 +66,8 @@ func DecodePacket(packet string) ([]byte, error) {
 
 	atlTimestamp := getTimestamp(packet[20:36])
 
-	atlLat, _ := hexToDec(packet[38:46])
-	atlLon, _ := hexToDec(packet[46:54])
+	atlLat, _ := hex.HexToFloat(packet[38:46])
+	atlLon, _ := hex.HexToFloat(packet[46:54])
 
 	fmt.Printf("hex lat: %v\nhex lon: %v\n", packet[38:46], packet[46:54])
 	fmt.Printf("dec lat: %v\ndec lon: %v\n", atlLat, atlLon)
@@ -140,8 +141,8 @@ func DecodePacket(packet string) ([]byte, error) {
 	finalPacket := &finalPacket{
 		Timestamp:  uint64(atlTimestamp.UnixMilli()),
 		Online:     true,
-		Lat:        uint32(atlLat),
-		Lon:        uint32(atlLon),
+		Lat:        atlLat,
+		Lon:        atlLon,
 		Speed:      uint32(atlSpeed),
 		Altitude:   uint32(atlAltitude),
 		Angle:      uint32(atlAngle),
